@@ -24,10 +24,10 @@ namespace ExportUtilityWwise
         private static AudioExportConfig _config;
 
         private const string ConfigFileName = "AudioExportConfig.json";
-        private const string DefaultGameDirectory = @"C:\Riot Games\VALORANT\live\ShooterGame\Content\Paks";
-        private const string DefaultAesKey = "0x4BE71AF2459CF83899EC9DC2CB60E22AC4B3047E0211034BBABE9D174C069DD6";
-        private const string DefaultObjectPath = "ShooterGame/Content/WwiseAudio/Events/SFX/UI/Events_UI_InGame/InGame/Play_sfx_UI_MatchVictory.uasset";
-        private const EGame DefaultGameOverride = EGame.GAME_Valorant;
+        private const string DefaultGameDirectory = @"C:/UntilDawn/UntilDawn/Windows/Bates/Content/Paks";
+        private const string DefaultAesKey = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        private const string DefaultObjectPath = "Bates/Content/WwiseAudio/Events/MUS/MUS_Events_WU_Prologue/Play_MUS_BAT_Prologue.uasset";
+        private const EGame DefaultGameOverride = EGame.GAME_UE5_3;
 
 
 
