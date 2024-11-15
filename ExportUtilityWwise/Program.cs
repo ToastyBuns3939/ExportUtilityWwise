@@ -39,7 +39,6 @@ namespace ExportUtilityWwise
             provider.SubmitKey(new FGuid(), new FAesKey(_config.aesKey));
             provider.LoadLocalization(ELanguage.English);
 
-            var allExports = provider.LoadObjectExports(_config.objectPath);
             var mediaExportFolder = Path.Combine("MediaExports");
 
             if (!Directory.Exists(mediaExportFolder))
@@ -47,13 +46,20 @@ namespace ExportUtilityWwise
                 Directory.CreateDirectory(mediaExportFolder);
             }
 
-            foreach (var export in allExports)
+            // Load object directly and handle export
+            var loadedObject = provider.LoadObject(_config.objectPath);
+
+            if (loadedObject != null)
             {
-                if (export.Class.Name == "AkAudioEventData") { SaveAudio(export, mediaExportFolder); }
+                SaveAudio(loadedObject, mediaExportFolder);
             }
+            else
+            {
+                Console.WriteLine("Failed to load object at path: " + _config.objectPath);
+            }
+
             Console.WriteLine("Press Enter to exit...");
             Console.ReadLine();
-
         }
 
         private static void LoadConfig()
