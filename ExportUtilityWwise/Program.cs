@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using CUE4Parse.UE4.Assets.Exports;
 using System.Diagnostics;
 using CUE4Parse_Conversion.Sounds;
+using OodleDotNet;
+using CUE4Parse.Compression;
 
 
 namespace ExportUtilityWwise
@@ -33,6 +35,7 @@ namespace ExportUtilityWwise
 
         public static void Main(string[] args)
         {
+            InitializeOodle(); // Ensure Oodle is initialized
             LoadConfig();
             var provider = new DefaultFileProvider(_config.gameDirectory, SearchOption.TopDirectoryOnly, true, new VersionContainer(_config.gameOverride));
             provider.Initialize();
@@ -60,6 +63,27 @@ namespace ExportUtilityWwise
 
             Console.WriteLine("Press Enter to exit...");
             Console.ReadLine();
+        }
+
+        private static void InitializeOodle()
+        {
+            try
+            {
+                // Attempt to download Oodle DLL if not present
+                if (!OodleHelper.DownloadOodleDll(OodleHelper.OODLE_DLL_NAME))
+                {
+                    Console.WriteLine("Oodle DLL download failed or DLL not found.");
+                    return;
+                }
+
+                // Initialize Oodle with the downloaded or existing DLL
+                OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
+                Console.WriteLine("Oodle initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to initialize Oodle: {ex.Message}");
+            }
         }
 
         private static void LoadConfig()
