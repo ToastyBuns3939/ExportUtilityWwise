@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -15,11 +15,24 @@
       <PlatformTarget>x64</PlatformTarget>
     </PropertyGroup>
 
+  <Target Name="CreateConfigFile" BeforeTargets="BeforeBuild">
+    <WriteLinesToFile
+      File="$(ProjectDir)AudioExportConfig.json"
+      Lines="{
+      &quot;gameDirectory&quot;:&quot;C:/UntilDawn/UntilDawn/Windows/Bates/Content/Paks&quot;,
+      &quot;aesKey&quot;:&quot;0x0000000000000000000000000000000000000000000000000000000000000000&quot;,
+      &quot;objectPath&quot;:&quot;Bates/Content/WwiseAudio/Events/MUS/MUS_Events_WU_Prologue/Play_MUS_BAT_Prologue.uasset&quot;,
+      &quot;gameOverride&quot;:&quot;GAME_UE5_3&quot;,
+      &quot;usmapPath&quot;:&quot;D:/ue4 modding/FModel/Output/.data/UDRemake.usmap&quot;
+    }"
+      Overwrite="true" />
+  </Target>
+  
     <ItemGroup>
       <ProjectReference Include="..\CUE4Parse\CUE4Parse-Conversion\CUE4Parse-Conversion.csproj" />
       <ProjectReference Include="..\CUE4Parse\CUE4Parse\CUE4Parse.csproj" />
     </ItemGroup>
-
+  
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>

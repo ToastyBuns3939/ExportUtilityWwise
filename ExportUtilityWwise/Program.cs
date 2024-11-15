@@ -10,6 +10,9 @@ using System.Diagnostics;
 using CUE4Parse_Conversion.Sounds;
 using OodleDotNet;
 using CUE4Parse.Compression;
+using CUE4Parse.UE4.Assets;
+using CUE4Parse.UE4.IO;
+using CUE4Parse.MappingsProvider;
 
 
 namespace ExportUtilityWwise
@@ -20,6 +23,7 @@ namespace ExportUtilityWwise
         public string aesKey { get; set; }
         public string objectPath { get; set; }
         public EGame gameOverride { get; set; }
+        public string usmapPath { get; set; }
     }
     public static class EventBasedAudioExportVal
     {
@@ -30,18 +34,40 @@ namespace ExportUtilityWwise
         private const string DefaultAesKey = "0x0000000000000000000000000000000000000000000000000000000000000000";
         private const string DefaultObjectPath = "Bates/Content/WwiseAudio/Events/MUS/MUS_Events_WU_Prologue/Play_MUS_BAT_Prologue.uasset";
         private const EGame DefaultGameOverride = EGame.GAME_UE5_3;
+        private const string DefaultusmapPath = "D:/ue4 modding/FModel/Output/.data/UDRemake.usmap";
 
 
 
         public static void Main(string[] args)
         {
-            InitializeOodle(); // Ensure Oodle is initialized
+            InitializeOodle();
             LoadConfig();
+
             var provider = new DefaultFileProvider(_config.gameDirectory, SearchOption.TopDirectoryOnly, true, new VersionContainer(_config.gameOverride));
+
+            // Use FileUsmapTypeMappingsProvider to load the usmap file if provided
+            if (!string.IsNullOrEmpty(_config.usmapPath) && File.Exists(_config.usmapPath))
+            {
+                try
+                {
+                    provider.MappingsContainer = new FileUsmapTypeMappingsProvider(_config.usmapPath);
+                    Console.WriteLine("Loaded usmap file successfully.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to load usmap file: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Mapping file not found or usmap path is empty.");
+            }
+
             provider.Initialize();
             provider.SubmitKey(new FGuid(), new FAesKey(_config.aesKey));
             provider.LoadLocalization(ELanguage.English);
 
+            var allExports = provider.LoadObjectExports(_config.objectPath);
             var mediaExportFolder = Path.Combine("MediaExports");
 
             if (!Directory.Exists(mediaExportFolder))
@@ -49,21 +75,16 @@ namespace ExportUtilityWwise
                 Directory.CreateDirectory(mediaExportFolder);
             }
 
-            // Load object directly and handle export
-            var loadedObject = provider.LoadObject(_config.objectPath);
-
-            if (loadedObject != null)
+            foreach (var export in allExports)
             {
-                SaveAudio(loadedObject, mediaExportFolder);
-            }
-            else
-            {
-                Console.WriteLine("Failed to load object at path: " + _config.objectPath);
+                if (export.Class.Name == "AkAudioEventData") { SaveAudio(export, mediaExportFolder); }
             }
 
             Console.WriteLine("Press Enter to exit...");
             Console.ReadLine();
         }
+
+
 
         private static void InitializeOodle()
         {
@@ -102,9 +123,11 @@ namespace ExportUtilityWwise
                     gameDirectory = DefaultGameDirectory,
                     aesKey = DefaultAesKey,
                     objectPath = DefaultObjectPath,
-                    gameOverride = DefaultGameOverride
+                    gameOverride = DefaultGameOverride,
+                    usmapPath = DefaultusmapPath,
                 };
-                SaveConfig();
+                SaveConfig(); // This ensures the file is written
+                Console.WriteLine("Config file created successfully.");
             }
         }
         private static void SaveConfig()
